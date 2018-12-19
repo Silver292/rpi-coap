@@ -62,8 +62,8 @@ def main():
     sensor_data = get_sensor_data()
 
     if sensor_data.has_data():
-        humidity_string = f'Humidity={sensor_data.humidity:.1f}%'
-        temperature_string = f'Temp={sensor_data.temperature:.1f}*'
+        humidity_string = 'Humidity={0:.1f}%'.format(sensor_data.humidity)
+        temperature_string = 'Temp={0:.1f}*'.format(sensor_data.temperature)
         print(humidity_string + ' ' + temperature_string)
         print(sensor_data.as_json())
 
