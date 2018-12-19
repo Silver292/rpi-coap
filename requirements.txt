@@ -1,2 +1,2 @@
 Adafruit-DHT==1.4.0
-CoAPthon==4.0.2
+CoAPthon3==1.0.1
