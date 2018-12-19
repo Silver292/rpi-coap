@@ -7,10 +7,17 @@ CoAP endpoint
 __author__ = "Tom Scott"
 
 import Adafruit_DHT
-import json
+from json import dumps
+from socket import gethostbyname, gaierror
+from time import sleep
+import signal
+
+from coapthon.client.helperclient import HelperClient
+from coapthon.utils import parse_uri
 
 _SENSOR = Adafruit_DHT.AM2302
 _GPIO_PIN = 4
+client = None
 
 class SensorData(object):
     """
@@ -35,7 +42,7 @@ class SensorData(object):
         """
         Returns the humidity and temperature data as a JSON string.
         """
-        return json.dumps({'humidity': self.humidity, \
+        return dumps({'humidity': self.humidity, \
                 'temperature': self.temperature})
 
     def __str__(self):
@@ -58,19 +65,51 @@ def get_sensor_data():
 
     return SensorData(humidity, temperature)
 
+def keyboard_interrupted(signum, frame):
+    global client
+    print("Interrupted by keyboard, stopping client")
+    client.stop()
+    exit(0)
+
 def main():
     """ Main entry point of the app """
+    # coap client
+    global client
 
-    # Note that sometimes you won't get a reading and
-    # the results will be null (because Linux can't
-    # guarantee the timing of calls to read the sensor).
-    sensor_data = get_sensor_data()
+    # path to thingsboards platform
+    path = "coap://demo.thingsboard.io/api/" + \
+            "v1/BuD24SbCRGyrwjdmYVds/telemetry"
 
-    if sensor_data.has_data():
-        print(sensor_data)
-        print(sensor_data.as_json())
+    host, port, path = parse_uri(path)
+
+    try:
+        tmp = gethostbyname(host)
+        host = tmp
+    except gaierror:
+        pass
+
+    client = HelperClient(server=(host, port))
+
+    while True:
+
+        # Note that sometimes you won't get a reading and
+        # the results will be null (because Linux can't
+        # guarantee the timing of calls to read the sensor).
+        sensor_data = get_sensor_data()
+
+        if sensor_data.has_data():
+            print(sensor_data)
+            payload = sensor_data.as_json()
+            print(payload)
+            response = client.post(path, payload)
+            print(response.pretty_print())
+        
+        sleep(5)
+
+    client.stop()
 
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
+    signal.signal(signal.SIGINT, keyboard_interrupted)
     main()
