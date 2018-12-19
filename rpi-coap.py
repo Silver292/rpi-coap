@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Script to get sensor data from DHT22 and provide the data through a CoAP endpoint
+Script to get sensor data from DHT22 and provide the data through a 
+CoAP endpoint
 """
 
 __author__ = "Tom Scott"
@@ -26,17 +27,20 @@ class SensorData(object):
         """
         Returns True if humidity and temperature are not None.
         """
-        return self.humidity is not None and self.temperature is not None
+        return self.humidity is not None and \
+               self.temperature is not None
 
 def get_sensor_data():
     """
-    Returns a SensorData object containing the latest data from the DHT22 sensor.
-    The method will 15 times to get data, if there is still no data available
-    it will return an empty SensorData object
+    Returns a SensorData object containing the latest data 
+    from the DHT22 sensor.
+    The method will 15 times to get data, if there is still no 
+    data available it will return an empty SensorData object
     """
 
-    # Try to grab a sensor reading.  Use the read_retry method which will retry up
-    # to 15 times to get a sensor reading (waiting 2 seconds between each retry).
+    # Try to grab a sensor reading.  Use the read_retry method 
+    # which will retry up to 15 times to get a sensor reading 
+    # (waiting 2 seconds between each retry).
     humidity, temperature = Adafruit_DHT.read_retry(_SENSOR, _GPIO_PIN)
 
     return SensorData(humidity, temperature)
@@ -50,7 +54,9 @@ def main():
     sensor_data = get_sensor_data()
 
     if sensor_data.has_data():
-        print('Temp={0:0.1f}*  Humidity={1:0.1f}%'.format(sensor_data.temperature, sensor_data.humidity))
+        temperature_string = f'Temp={sensor_data.temperature:.1f}*'
+        humidity_string = f'Humidity={sensor_data.humidity:.1f}%'
+        print(temperature_string + ' ' + humidity_string)
 
 
 if __name__ == "__main__":
