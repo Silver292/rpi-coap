@@ -38,6 +38,11 @@ class SensorData(object):
         return json.dumps({'humidity': self.humidity, \
                 'temperature': self.temperature})
 
+    def __str__(self):
+        humidity_string = 'Humidity={0:.1f}%'.format(self.humidity)
+        temperature_string = 'Temp={0:.1f}*C'.format(self.temperature)
+        return humidity_string + ' ' + temperature_string
+
 def get_sensor_data():
     """
     Returns a SensorData object containing the latest data 
@@ -62,9 +67,7 @@ def main():
     sensor_data = get_sensor_data()
 
     if sensor_data.has_data():
-        humidity_string = 'Humidity={0:.1f}%'.format(sensor_data.humidity)
-        temperature_string = 'Temp={0:.1f}*'.format(sensor_data.temperature)
-        print(humidity_string + ' ' + temperature_string)
+        print(sensor_data)
         print(sensor_data.as_json())
 
 
