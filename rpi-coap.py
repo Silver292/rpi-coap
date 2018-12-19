@@ -7,6 +7,7 @@ CoAP endpoint
 __author__ = "Tom Scott"
 
 import Adafruit_DHT
+import json
 
 _SENSOR = Adafruit_DHT.AM2302
 _GPIO_PIN = 4
@@ -18,7 +19,7 @@ class SensorData(object):
 
     def __init__(self, humidity, temperature):
         """
-        Set temperature and humidity
+        Set humidity and temperature
         """
         self.humidity = humidity
         self.temperature = temperature
@@ -29,6 +30,13 @@ class SensorData(object):
         """
         return self.humidity is not None and \
                self.temperature is not None
+
+    def as_json(self):
+        """
+        Returns the humidity and temperature data as a JSON string.
+        """
+        return json.dumps({'humidity': self.humidity, \
+                'temperature': self.temperature})
 
 def get_sensor_data():
     """
@@ -54,9 +62,10 @@ def main():
     sensor_data = get_sensor_data()
 
     if sensor_data.has_data():
-        temperature_string = f'Temp={sensor_data.temperature:.1f}*'
         humidity_string = f'Humidity={sensor_data.humidity:.1f}%'
-        print(temperature_string + ' ' + humidity_string)
+        temperature_string = f'Temp={sensor_data.temperature:.1f}*'
+        print(humidity_string + ' ' + temperature_string)
+        print(sensor_data.as_json())
 
 
 if __name__ == "__main__":
