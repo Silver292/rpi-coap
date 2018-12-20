@@ -10,16 +10,17 @@ import Adafruit_DHT
 from json import dumps
 from socket import gethostbyname, gaierror
 from time import sleep
+from socket import gethostbyname, gaierror
 
 from coapthon.client.helperclient import HelperClient
 from coapthon.utils import parse_uri
 
 _SENSOR = Adafruit_DHT.AM2302
 _GPIO_PIN = 4
-HOST = "demo.thingsboard.io"
-DEVICE_AUTH_TOKEN = "9tQn151djuEdRX0ucu0k"
-PORT = 5683 # Default CoAP port
-SLEEP_INTERVAL = 5
+_HOST = "demo.thingsboard.io"
+_DEVICE_AUTH_TOKEN = "9tQn151djuEdRX0ucu0k"
+_PORT = 5683 # Default CoAP port
+_SLEEP_INTERVAL = 5
 
 class SensorData(object):
     """
@@ -67,14 +68,31 @@ def get_sensor_data():
 
     return SensorData(humidity, temperature)
 
+def get_coap_client():
+    """
+    Procedure for creating the CoAP client.
+    Attempts to get IP address for host from the host name.
+    Returns CoAP HelperClient
+    """
+    host = _HOST
+
+    # Try to get ip address
+    try:
+        tmp = gethostbyname(host)
+        host = tmp
+    except gaierror:
+        # use domain if cannot get ip
+        pass
+
+    # create CoAP client
+    return HelperClient(server=(host, _PORT))
+
 def main():
     """ Main entry point of the app """
 
     # build endpoint URI to ThingsBoard platform
-    path = "api/v1/" + DEVICE_AUTH_TOKEN + "/telemetry"
-
-    # create CoAP client
-    client = HelperClient(server=(HOST, PORT))
+    path = "api/v1/" + _DEVICE_AUTH_TOKEN + "/telemetry"
+    client = get_coap_client()
 
     try:
         while True:
@@ -85,13 +103,13 @@ def main():
             sensor_data = get_sensor_data()
 
             if sensor_data.has_data():
-                print(sensor_data)
+                print('DATA:' + str(sensor_data))
                 payload = sensor_data.as_json()
-                print(payload)
+                print('PAYLOAD: ' + payload)
                 response = client.post(path, payload)
-                print(response.pretty_print())
+                print('RESPONSE:\n\t' + response.pretty_print())
             
-            sleep(SLEEP_INTERVAL)
+            sleep(_SLEEP_INTERVAL)
 
     except KeyboardInterrupt:
         print("Interrupted by keyboard, stopping client")
