@@ -90,8 +90,9 @@ def get_coap_client():
 def main():
     """ Main entry point of the app """
 
-    # build endpoint URI to ThingsBoard platform
+    # Create path that the data will be sent to
     path = "api/v1/" + _DEVICE_AUTH_TOKEN + "/telemetry"
+    # Create a CoAP client
     client = get_coap_client()
 
     try:
@@ -103,14 +104,17 @@ def main():
             sensor_data = get_sensor_data()
 
             if sensor_data.has_data():
-                print('DATA:' + str(sensor_data))
+                # Format the data to JSON to be sent
                 payload = sensor_data.as_json()
-                print('PAYLOAD: ' + payload)
+                # Send POST message with payload to Cloud
                 response = client.post(path, payload)
-                print('RESPONSE:\n\t' + response.pretty_print())
+                # Print response from cloud to console
+                print(response.pretty_print())
             
+            # Wait specified time and repeat
             sleep(_SLEEP_INTERVAL)
 
+    # Allow Ctrl + C to stop the script
     except KeyboardInterrupt:
         print("Interrupted by keyboard, stopping client")
         client.stop()
