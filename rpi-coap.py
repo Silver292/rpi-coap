@@ -87,6 +87,19 @@ def get_coap_client():
     # create CoAP client
     return HelperClient(server=(host, _PORT))
 
+def send_data(sensor_data, client, path):
+    """
+    Takes a SensorData object as an argument,
+    formats the data to JSON and sends to
+    ThingsBoard CoAP endpoint.
+    """
+    # Format the data to JSON to be sent
+    payload = sensor_data.as_json()
+    # Send POST message with payload to endpoint
+    response = client.post(path, payload)
+    # Print response from cloud to console
+    print(response.pretty_print())
+
 def main():
     """ Main entry point of the app """
 
@@ -105,11 +118,7 @@ def main():
 
             if sensor_data.has_data():
                 # Format the data to JSON to be sent
-                payload = sensor_data.as_json()
-                # Send POST message with payload to Cloud
-                response = client.post(path, payload)
-                # Print response from cloud to console
-                print(response.pretty_print())
+                send_data(sensor_data, client, path)
             
             # Wait specified time and repeat
             sleep(_SLEEP_INTERVAL)
