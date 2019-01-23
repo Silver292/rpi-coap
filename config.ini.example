@@ -1,0 +1,19 @@
+[DEFAULT]
+# Default CoAP port
+PORT = 5683 
+SLEEP_INTERVAL = 5
+GPIO_PIN = 4
+HOST = demo.thingsboard.io
+DEVICE_AUTH_TOKEN = 
+
+[custom]
+# Custom CoAP port
+PORT = 5683 
+# Custom sleep interval
+SLEEP_INTERVAL = 5
+# GPIO input for DHT22 sensor
+GPIO_PIN = 4
+# Thingsboard host
+HOST = demo.thingsboard.io
+# Thingsboard device auth token
+DEVICE_AUTH_TOKEN = 
