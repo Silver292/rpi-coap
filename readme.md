@@ -5,6 +5,7 @@
 - [Installation](#installation)
   - [Connecting the sensor](#connecting-the-sensor)
   - [Downloading the script](#downloading-the-script)
+  - [Configuration](#configuration)
 - [Usage](#usage)
   
 ## Introduction
@@ -31,6 +32,15 @@ To connect the DHT22 sensor to the RPi:
 $ git clone https://github.com/Silver292/rpi-coap.git
 $ cd rpi-coap/
 ```
+
+
+### Configuration
+
+Settings are kept in the ``config.ini`` file. You can copy ``config.ini.example`` to create your own or this file will be created the first time you run the script.
+
+Most of the default settings should be fine, unless you are using a different GPIO port on the Raspberry Pi.
+You will need to update the ``host`` and ``device_auth_token`` settings in the ``config.ini``. 
+These can be retrieved from the Thingsboard you wish to send the sensor data to.
 
 ## Usage
 
