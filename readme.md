@@ -50,15 +50,15 @@ The auth token can be obtained by clicking the button highlighted in yellow abov
 ### Config.ini
 
 
-``SLEEP_INTERVAL = 5``  Amount of time between each sensor reading and sending of data.
+``SLEEP_INTERVAL = 5``  - Amount of time between each sensor reading and sending of data.
 
-``GPIO_PIN = 4`` GPIO pin on the RPi used to connect to the DHT22 sensor. Defaults to 4, shown in [installation](#connecting-the-sensor).
+``GPIO_PIN = 4`` - GPIO pin on the RPi used to connect to the DHT22 sensor. Defaults to 4, shown in [installation](#connecting-the-sensor).
 
-``PORT = 5683 `` Port for CoAP endpoint, defaults to 5683.
+``PORT = 5683 `` - Port for CoAP endpoint, defaults to 5683.
 
-``HOST = demo.thingsboard.io`` Host of the Thingsboard. Defaults to using the Thingsboard live demo.
+``HOST = demo.thingsboard.io`` - Host of the Thingsboard. Defaults to using the Thingsboard live demo.
 
-``DEVICE_AUTH_TOKEN = `` Auth token for device. This is retrieved from the Thingsboard devices section.
+``DEVICE_AUTH_TOKEN = `` - Auth token for device. This is retrieved from the Thingsboard devices section.
 
 ## Usage
 
