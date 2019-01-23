@@ -6,6 +6,7 @@
   - [Connecting the sensor](#connecting-the-sensor)
   - [Downloading the script](#downloading-the-script)
   - [Configuration](#configuration)
+  - [Config.ini](#configini)
 - [Usage](#usage)
   
 ## Introduction
@@ -39,9 +40,32 @@ $ cd rpi-coap/
 Settings are kept in the ``config.ini`` file. You can copy ``config.ini.example`` to create your own or this file will be created the first time you run the script.
 
 Most of the default settings should be fine, unless you are using a different GPIO port on the Raspberry Pi.
+
 You will need to update the ``host`` and ``device_auth_token`` settings in the ``config.ini``. 
 These can be retrieved from the Thingsboard you wish to send the sensor data to.
 
+![Where to get auth token](images/auth_token.png)
+The auth token can be obtained by clicking the button highlighted in yellow above.
+
+### Config.ini
+
+
+``SLEEP_INTERVAL = 5``  - Amount of time between each sensor reading and sending of data.
+
+``GPIO_PIN = 4`` - GPIO pin on the RPi used to connect to the DHT22 sensor. Defaults to 4, shown in [installation](#connecting-the-sensor).
+
+``PORT = 5683 `` - Port for CoAP endpoint, defaults to 5683.
+
+``HOST = demo.thingsboard.io`` - Host of the Thingsboard. Defaults to using the Thingsboard live demo.
+
+``DEVICE_AUTH_TOKEN = `` - Auth token for device. This is retrieved from the Thingsboard devices section.
+
 ## Usage
 
-TODO:
+To start recording and sending data to the Thingsboard platform run:
+
+```bash
+$ python rpi-coap.py
+```
+
+To stop the script press ``Ctrl + Z``.
