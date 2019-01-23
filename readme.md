@@ -23,9 +23,9 @@ The script creates a Constrained Application Protocol (CoAP) client on the RPi a
 
 To connect the DHT22 sensor to the RPi:
 
-  1. Connect the - output on the sensor the pin 6 on the RPi.
-  2. Connect the + input on the sensor to pin 2 on the RPi.
-  3. Connect the 'output' pin on the sensor to pin 7 on the RPi.
+  1. Connect the ``-`` output on the sensor the pin 6 on the RPi.
+  2. Connect the ``+`` input on the sensor to pin 2 on the RPi.
+  3. Connect the ``output`` pin on the sensor to pin 7 on the RPi.
 
 ### Downloading the script
 
@@ -54,11 +54,11 @@ The auth token can be obtained by clicking the button highlighted in yellow abov
 
 ``GPIO_PIN = 4`` - GPIO pin on the RPi used to connect to the DHT22 sensor. Defaults to 4, shown in [installation](#connecting-the-sensor).
 
-``PORT = 5683 `` - Port for CoAP endpoint, defaults to 5683.
+``PORT = 5683`` - Port for CoAP endpoint, defaults to 5683.
 
 ``HOST = demo.thingsboard.io`` - Host of the Thingsboard. Defaults to using the Thingsboard live demo.
 
-``DEVICE_AUTH_TOKEN = `` - Auth token for device. This is retrieved from the Thingsboard devices section.
+``DEVICE_AUTH_TOKEN =`` - Auth token for device. This is retrieved from the Thingsboard devices section.
 
 ## Usage
 

@@ -140,12 +140,21 @@ def main(config):
         exit(0)
 
 def get_config():
+    """
+    Gets the config settings form config.ini
+    if config.ini does not exist, create config.ini
+    from example file.
+    """
+    # Check of config.ini exists
     if not os.path.exists('config.ini'):
+        # if example exists, copy to config.ini
         if os.path.exists('config.ini.example'):
             copy('config.ini.example', 'config.ini')
         else:
+            # Error, no example or config found
             raise FileNotFoundError('No config.ini or config.ini.example found.')
         
+    # create the config dictionary
     config = configparser.ConfigParser()
     config.read('config.ini')
     return config
