@@ -15,10 +15,20 @@ from shutil import copy
 import os
 import types
 import pkg_resources
+
+# load Adafruit library if available (on RPi) else load mocks
 try:
     import Adafruit_DHT as sensor_lib
-catch ImportError:
-    pass
+    print('Adafruit library found - data will be sent from sensor.')
+except ImportError:
+    # If running on windows create a mock library
+    print('Adafruit library not found; creating mock library.')
+    print('Data sent is test data - not from sensor.')
+    # Create a mock static method to return test data, 
+    # this will always return 20% humidity and 25C temperature
+    sensor_lib = types.SimpleNamespace(
+        read_retry = lambda sensor, gpio_pin: (20, 25),
+        AM2302 = 1)
 
 from coapthon.client.helperclient import HelperClient
 from coapthon.utils import parse_uri
@@ -109,21 +119,6 @@ def main():
     # Get configuration file
     config = get_config()
 
-    # load Adafruit library if available (on RPi) else load mocks
-    try:
-        sensor_lib = __import__('Adafruit_DHT') # Library will not load on windows
-        sensor = sensor_lib.AM2302
-        print('Adafruit library found - data will be sent from sensor.')
-    except ImportError as error:
-        # If running on windows create a mock library
-        print('Adafruit library not found; creating mock library.')
-        print('Data sent is test data - not from sensor.')
-        # Create a mock static method to return test data, 
-        # this will always return 20% humidity and 25C temperature
-        sensor_lib = types.SimpleNamespace(
-            read_retry = lambda sensor, gpio_pin: (20, 25) )
-        sensor = 1
-
     # Create path that the data will be sent to
     auth_token = config.get('custom', 'device_auth_token')
 
@@ -150,7 +145,7 @@ def main():
             # guarantee the timing of calls to read the sensor).
             sensor_data = get_sensor_data(
                 sensor_lib,
-                sensor,
+                sensor_lib.AM2302,
                 config.getint('custom', 'gpio_pin'))
 
             if sensor_data.has_data():
