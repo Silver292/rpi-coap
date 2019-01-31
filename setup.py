@@ -7,10 +7,6 @@ import sys
 with open('readme.md') as readme_file:
     readme = readme_file.read()
 
-requirements = [
-    'CoAPthon3==1.0.1'
-] + ['Adafruit-DHT==1.4.0'] if sys.platform.startswith("linux") else []
-
 setup(
     name='rpicoap',
     version='0.1.0',
@@ -29,7 +25,12 @@ setup(
     package_dir={'rpicoap':
                  'rpicoap'},
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[
+        'CoAPthon3==1.0.1'
+    ],
+    extras_require={
+        ':sys.platform == "linux"' : ['Adafruit-DHT==1.4.0']
+    },
     license="MIT license",
     zip_safe=False,
     keywords='rpicoap',

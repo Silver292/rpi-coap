@@ -6,18 +6,17 @@ CoAP endpoint
 
 __author__ = "Tom Scott"
 
-import Adafruit_DHT
+
 from json import dumps
 from socket import gethostbyname, gaierror
 from time import sleep
 import configparser
 from shutil import copy
 import os
+import types
 
 from coapthon.client.helperclient import HelperClient
 from coapthon.utils import parse_uri
-
-_SENSOR = Adafruit_DHT.AM2302
 
 class SensorData(object):
     """
@@ -50,18 +49,20 @@ class SensorData(object):
         temperature_string = 'Temp={0:.1f}*C'.format(self.temperature)
         return humidity_string + ' ' + temperature_string
 
-def get_sensor_data(gpio_pin):
+def get_sensor_data(library, sensor, gpio_pin):
     """
     Returns a SensorData object containing the latest data 
     from the DHT22 sensor.
     The method will 15 times to get data, if there is still no 
-    data available it will return an empty SensorData object
+    data available it will return an empty SensorData object.
+    If the Adafruit library is not installed, 
+    mock results will be returned.
     """
 
     # Try to grab a sensor reading.  Use the read_retry method 
     # which will retry up to 15 times to get a sensor reading 
     # (waiting 2 seconds between each retry).
-    humidity, temperature = Adafruit_DHT.read_retry(_SENSOR, gpio_pin)
+    humidity, temperature = library.read_retry(sensor, gpio_pin)
 
     return SensorData(humidity, temperature)
 
@@ -103,6 +104,21 @@ def main():
     # Get configuration file
     config = get_config()
 
+    # load Adafruit library if available (on RPi) else load mocks
+    try:
+        import Adafruit_DHT # Library will not load on windows
+        sensor = Adafruit_DHT.AM2302
+        print('Adafruit library found - data will be sent from sensor.')
+    except ImportError as error:
+        # If running on windows create a mock library
+        print('Adafruit library not found; creating mock library.')
+        print('Data sent is test data - not from sensor.')
+        # Create a mock static method to return test data, 
+        # this will always return 20% humidity and 25C temperature
+        Adafruit_DHT = types.SimpleNamespace(
+            read_retry = lambda sensor, gpio_pin: (20, 25) )
+        sensor = 1
+
     # Create path that the data will be sent to
     auth_token = config.get('custom', 'device_auth_token')
 
@@ -127,7 +143,10 @@ def main():
             # Note that sometimes you won't get a reading and
             # the results will be null (because Linux can't
             # guarantee the timing of calls to read the sensor).
-            sensor_data = get_sensor_data(config.getint('custom', 'gpio_pin'))
+            sensor_data = get_sensor_data(
+                Adafruit_DHT,
+                sensor,
+                config.getint('custom', 'gpio_pin'))
 
             if sensor_data.has_data():
                 # Format the data to JSON to be sent
