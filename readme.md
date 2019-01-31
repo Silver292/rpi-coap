@@ -19,7 +19,7 @@ The script creates a Constrained Application Protocol (CoAP) client on the RPi a
 
 ### Connecting the sensor
 
-![Diagram showing sensor connection to RPi](images/rpi_wiring.png)
+![Diagram showing sensor connection to RPi](https://user-images.githubusercontent.com/5542588/52054623-0c47f100-2555-11e9-8996-eca1224aa146.png)
 
 To connect the DHT22 sensor to the RPi:
 
@@ -44,7 +44,7 @@ Most of the default settings should be fine, unless you are using a different GP
 You will need to update the ``host`` and ``device_auth_token`` settings in the ``config.ini``. 
 These can be retrieved from the Thingsboard you wish to send the sensor data to.
 
-![Where to get auth token](images/auth_token.png)
+![Where to get auth token](https://user-images.githubusercontent.com/5542588/52054622-0c47f100-2555-11e9-82c7-e7303507d851.png)
 The auth token can be obtained by clicking the button highlighted in yellow above.
 
 ### Config.ini
