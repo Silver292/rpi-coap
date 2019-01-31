@@ -15,6 +15,10 @@ from shutil import copy
 import os
 import types
 import pkg_resources
+try:
+    import Adafruit_DHT as sensor_lib
+catch ImportError:
+    pass
 
 from coapthon.client.helperclient import HelperClient
 from coapthon.utils import parse_uri
@@ -107,8 +111,8 @@ def main():
 
     # load Adafruit library if available (on RPi) else load mocks
     try:
-        import Adafruit_DHT # Library will not load on windows
-        sensor = Adafruit_DHT.AM2302
+        sensor_lib = __import__('Adafruit_DHT') # Library will not load on windows
+        sensor = sensor_lib.AM2302
         print('Adafruit library found - data will be sent from sensor.')
     except ImportError as error:
         # If running on windows create a mock library
@@ -116,7 +120,7 @@ def main():
         print('Data sent is test data - not from sensor.')
         # Create a mock static method to return test data, 
         # this will always return 20% humidity and 25C temperature
-        Adafruit_DHT = types.SimpleNamespace(
+        sensor_lib = types.SimpleNamespace(
             read_retry = lambda sensor, gpio_pin: (20, 25) )
         sensor = 1
 
@@ -145,7 +149,7 @@ def main():
             # the results will be null (because Linux can't
             # guarantee the timing of calls to read the sensor).
             sensor_data = get_sensor_data(
-                Adafruit_DHT,
+                sensor_lib,
                 sensor,
                 config.getint('custom', 'gpio_pin'))
 
