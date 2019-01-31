@@ -25,6 +25,9 @@ setup(
     package_dir={'rpicoap':
                  'rpicoap'},
     include_package_data=True,
+    package_data={
+        'rpicoap': ['config.ini.example']
+    },
     install_requires=[
         'CoAPthon3==1.0.1'
     ],

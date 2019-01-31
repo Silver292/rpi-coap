@@ -14,6 +14,7 @@ import configparser
 from shutil import copy
 import os
 import types
+import pkg_resources
 
 from coapthon.client.helperclient import HelperClient
 from coapthon.utils import parse_uri
@@ -167,11 +168,14 @@ def get_config():
     if config.ini does not exist, create config.ini
     from example file.
     """
+    # get example file from package
+    config_example = pkg_resources.resource_filename(__name__, "config.ini.example")
+
     # Check of config.ini exists
     if not os.path.exists('config.ini'):
         # if example exists, copy to config.ini
-        if os.path.exists('config.ini.example'):
-            copy('config.ini.example', 'config.ini')
+        if os.path.exists(config_example):
+            copy(config_example, 'config.ini')
         else:
             # Error, no example or config found
             raise FileNotFoundError('No config.ini or config.ini.example found.')
@@ -180,4 +184,3 @@ def get_config():
     config = configparser.ConfigParser()
     config.read('config.ini')
     return config
-    
