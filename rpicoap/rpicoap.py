@@ -97,8 +97,11 @@ def send_data(sensor_data, client, path):
     # Print response from cloud to console
     print(response.pretty_print())
 
-def main(config):
+def main():
     """ Main entry point of the app """
+
+    # Get configuration file
+    config = get_config()
 
     # Create path that the data will be sent to
     auth_token = config.get('custom', 'device_auth_token')
@@ -158,8 +161,4 @@ def get_config():
     config = configparser.ConfigParser()
     config.read('config.ini')
     return config
-
-if __name__ == "__main__":
-    """ This is executed when run from the command line """
-    config = get_config()
-    main(config)
+    
