@@ -63,6 +63,7 @@ You will need to update the ``host`` and ``device_auth_token`` settings in the `
 These can be retrieved from the Thingsboard you wish to send the sensor data to.
 
 ![Where to get auth token](https://user-images.githubusercontent.com/5542588/52054622-0c47f100-2555-11e9-82c7-e7303507d851.png)
+
 The auth token can be obtained by clicking the button highlighted in yellow above.
 
 ### Config.ini
