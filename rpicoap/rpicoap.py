@@ -169,17 +169,19 @@ def get_config():
     """
     # get example file from package
     config_example = pkg_resources.resource_filename(__name__, "config.ini.example")
+    config_ini = os.path.join(os.path.dirname(config_example), 'config.ini')
 
     # Check of config.ini exists
-    if not os.path.exists('config.ini'):
+    if not os.path.exists(config_ini):
         # if example exists, copy to config.ini
         if os.path.exists(config_example):
-            copy(config_example, 'config.ini')
+            copy(config_example, config_ini)
+            print('Created config.ini at {}'.format(config_ini))
         else:
             # Error, no example or config found
             raise FileNotFoundError('No config.ini or config.ini.example found.')
         
     # create the config dictionary
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(config_ini)
     return config
