@@ -29,11 +29,29 @@ To connect the DHT22 sensor to the RPi:
 
 ### Downloading the script
 
+Clone the repository:
 ```bash
 $ git clone https://github.com/Silver292/rpi-coap.git
 $ cd rpi-coap/
 ```
+Create a virtual environment if needed:
 
+```bash
+$ virtualenv .env
+$ source .env/bin/activate
+```
+
+Install the application:
+
+```bash
+$ pip install .
+```
+
+Application is run using:
+
+```bash
+$ rpicoap
+```
 
 ### Configuration
 
@@ -65,7 +83,7 @@ The auth token can be obtained by clicking the button highlighted in yellow abov
 To start recording and sending data to the Thingsboard platform run:
 
 ```bash
-$ python rpi-coap.py
+$ rpi-coap
 ```
 
 To stop the script press ``Ctrl + Z``.
