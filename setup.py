@@ -29,7 +29,8 @@ setup(
         'rpicoap': ['config.ini.example']
     },
     install_requires=[
-        'CoAPthon3==1.0.1'
+        'CoAPthon3==1.0.1',
+        'Click'
     ],
     extras_require={
         ':sys.platform == "linux"' : ['Adafruit-DHT==1.4.0']

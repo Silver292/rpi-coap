@@ -6,7 +6,7 @@ CoAP endpoint
 
 __author__ = "Tom Scott"
 
-
+import click
 from json import dumps
 from socket import gethostbyname, gaierror
 from time import sleep
@@ -15,15 +15,17 @@ from shutil import copy
 import os
 import types
 import pkg_resources
+import subprocess
+import sys
 
 # load Adafruit library if available (on RPi) else load mocks
 try:
     import Adafruit_DHT as sensor_lib
-    print('Adafruit library found - data will be sent from sensor.')
+    LIBRARY_MESSAGE = 'Adafruit library found - data will be sent from sensor.'
 except ImportError:
     # If running on windows create a mock library
-    print('Adafruit library not found; creating mock library.')
-    print('Data sent is test data - not from sensor.')
+    LIBRARY_MESSAGE = 'Adafruit library not found; creating mock library.'
+    LIBRARY_MESSAGE += '\nData sent is test data - not from sensor.'
     # Create a mock static method to return test data, 
     # this will always return 20% humidity and 25C temperature
     sensor_lib = types.SimpleNamespace(
@@ -111,13 +113,18 @@ def send_data(sensor_data, client, path):
     # Send POST message with payload to endpoint
     response = client.post(path, payload)
     # Print response from cloud to console
-    print(response.pretty_print())
+    click.echo(response.pretty_print())
 
-def main():
+@click.command()
+@click.option('--edit', is_flag=True, help='open config file')
+def main(edit):
     """ Main entry point of the app """
 
     # Get configuration file
-    config = get_config()
+    config = get_config(edit)
+
+    # Print information about adafruit library loading
+    click.echo(LIBRARY_MESSAGE)
 
     # Create path that the data will be sent to
     auth_token = config.get('custom', 'device_auth_token')
@@ -156,11 +163,11 @@ def main():
 
     # Allow Ctrl + C to stop the script
     except KeyboardInterrupt:
-        print("Interrupted by keyboard, stopping client")
+        click.echo("Interrupted by keyboard, stopping client")
         client.stop()
         exit(0)
 
-def get_config():
+def get_config(edit):
     """
     Gets the config settings form config.ini
     if config.ini does not exist, create config.ini
@@ -175,11 +182,22 @@ def get_config():
         # if example exists, copy to config.ini
         if os.path.exists(config_example):
             copy(config_example, config_ini)
-            print('Created config.ini at {}'.format(config_ini))
+            click.echo('Created config.ini at {}'.format(config_ini))
         else:
             # Error, no example or config found
             raise FileNotFoundError('No config.ini or config.ini.example found.')
         
+    # If edit flag is passed at the command line open the config
+    # file with the default text editor for the OS
+    if(edit):
+        if sys.platform.startswith('darwin'):
+            subprocess.call(('open', config_ini))
+        elif os.name == 'nt': # For Windows
+            os.startfile(config_ini)
+        elif os.name == 'posix': # For Linux, Mac, etc.
+            subprocess.call(('xdg-open', config_ini))
+        exit()
+
     # create the config dictionary
     config = configparser.ConfigParser()
     config.read(config_ini)
