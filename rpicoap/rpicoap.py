@@ -64,7 +64,7 @@ class SensorData(object):
         temperature_string = 'Temp={0:.1f}*C'.format(self.temperature)
         return humidity_string + ' ' + temperature_string
 
-def get_sensor_data(library, sensor, gpio_pin):
+def get_sensor_data(sensor, gpio_pin):
     """
     Returns a SensorData object containing the latest data 
     from the DHT22 sensor.
@@ -77,7 +77,7 @@ def get_sensor_data(library, sensor, gpio_pin):
     # Try to grab a sensor reading.  Use the read_retry method 
     # which will retry up to 15 times to get a sensor reading 
     # (waiting 2 seconds between each retry).
-    humidity, temperature = library.read_retry(sensor, gpio_pin)
+    humidity, temperature = sensor_lib.read_retry(sensor, gpio_pin)
 
     return SensorData(humidity, temperature)
 
@@ -144,7 +144,6 @@ def main():
             # the results will be null (because Linux can't
             # guarantee the timing of calls to read the sensor).
             sensor_data = get_sensor_data(
-                sensor_lib,
                 sensor_lib.AM2302,
                 config.getint('custom', 'gpio_pin'))
 
