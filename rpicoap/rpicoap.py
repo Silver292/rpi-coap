@@ -195,7 +195,7 @@ def get_config(edit):
         elif os.name == 'nt': # For Windows
             os.startfile(config_ini)
         elif os.name == 'posix': # For Linux, Mac, etc.
-            subprocess.call(('xdg-open', config_ini))
+            subprocess.call(('vi', config_ini))
         exit()
 
     # create the config dictionary
