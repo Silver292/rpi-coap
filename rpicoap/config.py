@@ -15,8 +15,15 @@ class Config(object):
         # Read the config file
         self._read_config()
 
-        # set auth token and raise error if not present
-        self.auth_token = self._create_auth()
+    @property
+    def auth_token(self):
+        # Create path that the data will be sent to
+        temp = self._config.get('custom', 'device_auth_token')
+
+        # Raise an error if the auth token is not defined in config file
+        if not temp:
+            raise ValueError('Device auth token not present, please update config.ini by running rpicoap --edit')
+        return temp
 
     @property
     def gpio_pin(self):
@@ -39,15 +46,6 @@ class Config(object):
         # Make sure sleep interval is at least one second
         sleep_interval = self._getint('sleep_interval')
         return sleep_interval if sleep_interval >= 1 else 1 
-
-    def _create_auth(self):
-        # Create path that the data will be sent to
-        temp = self._config.get('custom', 'device_auth_token')
-
-        # Raise an error if the auth token is not defined in config file
-        if not temp:
-            raise ValueError('Device auth token not present, please update config.ini by running rpicoap --edit')
-        return temp
 
     def _get(self, property):
         return self._config.get('custom', property)
