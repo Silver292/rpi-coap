@@ -10,6 +10,7 @@ import click
 from json import dumps
 from socket import gethostbyname, gaierror
 from time import sleep
+from datetime import datetime
 import configparser
 from shutil import copy
 import os
@@ -106,7 +107,7 @@ def get_coap_client(host, port):
     # create CoAP client
     return HelperClient(server=(_host, port))
 
-def send_data(sensor_data, client, path):
+def send_data(sensor_data, client, path, verbose):
     """
     Takes a SensorData object as an argument,
     formats the data to JSON and sends to
@@ -116,12 +117,15 @@ def send_data(sensor_data, client, path):
     payload = sensor_data.as_json()
     # Send POST message with payload to endpoint
     response = client.post(path, payload)
-    # Print response from cloud to console
-    click.echo(response.pretty_print())
+
+    # Print data transmitted
+    if verbose:
+        click.echo(str(datetime.now()) + '\tData sent:\t' + str(sensor_data))
 
 @click.command()
 @click.option('--edit', is_flag=True, help='open config file')
-def main(edit):
+@click.option('--verbose', is_flag=True, help='show data transmitted')
+def main(edit, verbose):
     """ Main entry point of the app """
 
     # Get configuration file
@@ -160,7 +164,7 @@ def main(edit):
 
             if sensor_data.has_data():
                 # Format the data to JSON to be sent
-                send_data(sensor_data, client, path)
+                send_data(sensor_data, client, path, verbose)
             
             # Wait specified time and repeat
             sleep(sleep_interval)
