@@ -17,6 +17,11 @@ import types
 import pkg_resources
 import subprocess
 import sys
+from coapthon.client.helperclient import HelperClient
+import logging
+
+# Set default logging level for imported module
+logging.getLogger('coapthon').setLevel(logging.WARNING)
 
 # load Adafruit library if available (on RPi) else load mocks
 try:
@@ -32,8 +37,7 @@ except ImportError:
         read_retry = lambda sensor, gpio_pin: (20, 25),
         AM2302 = 1)
 
-from coapthon.client.helperclient import HelperClient
-from coapthon.utils import parse_uri
+
 
 class SensorData(object):
     """
