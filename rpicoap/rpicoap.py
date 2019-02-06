@@ -11,17 +11,12 @@ import json
 from socket import gethostbyname, gaierror
 from time import sleep
 from datetime import datetime
-import configparser
-from shutil import copy
-import os
 import types
-import pkg_resources
-import subprocess
-import sys
 from coapthon.client.helperclient import HelperClient
 import logging
 import csv
 from rpicoap.sensordata import SensorData
+from rpicoap.config import Config
 
 # Set default logging level for imported module
 logging.getLogger('coapthon').setLevel(logging.WARNING)
@@ -130,28 +125,20 @@ def main(edit, verbose, file):
     """ Main entry point of the app """
 
     # Get configuration file
-    config = get_config(edit)
+    config = Config()
+
+    # If edit flag is passed open config file and exit program
+    if edit:
+        config.open()
+        exit()
 
     # Print information about adafruit library loading
     click.echo(LIBRARY_MESSAGE)
 
-    # Create path that the data will be sent to
-    auth_token = config.get('custom', 'device_auth_token')
-
-    # Raise an error if the auth token is not defined in config file
-    if not auth_token:
-        raise ValueError('Device auth token not present, please update config.ini by running rpicoap --edit')
-
-    path = "api/v1/" + auth_token + "/telemetry"
-
     # Create a CoAP client
     client = get_coap_client(
-        config.get('custom', 'host'),
-        config.getint('custom', 'port'))
-
-    # Make sure sleep interval is at least one second
-    sleep_interval = config.getint('custom', 'sleep_interval')
-    sleep_interval = sleep_interval if sleep_interval >= 1 else 1 
+        config.host,
+        config.port)
 
     try:
 
@@ -159,7 +146,7 @@ def main(edit, verbose, file):
 
         # Send test data if provided
         if file:
-            send_test_data(file, client, path, verbose, sleep_interval)
+            send_test_data(file, client, config.path, verbose, config.sleep_interval)
 
         # Else read from sensor
         else:
@@ -171,14 +158,14 @@ def main(edit, verbose, file):
                 # guarantee the timing of calls to read the sensor).
                 sensor_data = get_sensor_data(
                     sensor_lib.AM2302,
-                    config.getint('custom', 'gpio_pin'))
+                    config.gpio_pin)
 
                 if sensor_data.has_data():
                     # Format the data to JSON to be sent
-                    send_data(sensor_data, client, path, verbose)
+                    send_data(sensor_data, client, config.path, verbose)
                 
                 # Wait specified time and repeat
-                sleep(sleep_interval)
+                sleep(config.sleep_interval)
 
     # Allow Ctrl + C to stop the script
     except KeyboardInterrupt:
@@ -186,39 +173,3 @@ def main(edit, verbose, file):
     finally:
         client.stop()
         exit(0)
-
-def get_config(edit):
-    """
-    Gets the config settings form config.ini
-    if config.ini does not exist, create config.ini
-    from example file.
-    """
-    # get example file from package
-    config_example = pkg_resources.resource_filename(__name__, "config.ini.example")
-    config_ini = os.path.join(os.path.dirname(config_example), 'config.ini')
-
-    # Check of config.ini exists
-    if not os.path.exists(config_ini):
-        # if example exists, copy to config.ini
-        if os.path.exists(config_example):
-            copy(config_example, config_ini)
-            click.echo('Created config.ini at {}'.format(config_ini))
-        else:
-            # Error, no example or config found
-            raise FileNotFoundError('No config.ini or config.ini.example found.')
-        
-    # If edit flag is passed at the command line open the config
-    # file with the default text editor for the OS
-    if(edit):
-        if sys.platform.startswith('darwin'):
-            subprocess.call(('open', config_ini))
-        elif os.name == 'nt': # For Windows
-            os.startfile(config_ini)
-        elif os.name == 'posix': # For Linux, Mac, etc.
-            subprocess.call(('vi', config_ini))
-        exit()
-
-    # create the config dictionary
-    config = configparser.ConfigParser()
-    config.read(config_ini)
-    return config
