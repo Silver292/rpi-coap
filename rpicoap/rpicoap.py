@@ -52,13 +52,13 @@ def get_sensor_data(sensor, gpio_pin):
 
     return SensorData(humidity, temperature)
 
-def get_coap_client(host, port):
+def get_coap_client(config):
     """
     Procedure for creating the CoAP client.
     Attempts to get IP address for host from the host name.
     Returns CoAP HelperClient
     """
-    _host = host
+    _host = config.host
 
     # Try to get ip address
     try:
@@ -69,7 +69,7 @@ def get_coap_client(host, port):
         pass
 
     # create CoAP client
-    return HelperClient(server=(_host, port))
+    return HelperClient(server=(_host, config.port))
 
 def send_data(sensor_data, client, path, verbose):
     """
@@ -87,7 +87,12 @@ def send_data(sensor_data, client, path, verbose):
         click.echo(str(datetime.now()) + '\tData sent:\t' + str(sensor_data))
 
 def send_test_data(file, client, path, verbose, sleep_interval):
-
+    """
+    Reads data from csv file passed at the command line and sends
+    the data to the CoAP endpoint in the configuration file.
+    Data is expected to be in the format humidity,temperature and
+    can optionally contain a header row.
+    """
     print('Sending data from file: {}'.format(file))
 
     with open(file, 'r') as data_file:
@@ -136,23 +141,17 @@ def main(edit, verbose, file):
     click.echo(LIBRARY_MESSAGE)
 
     # Create a CoAP client
-    client = get_coap_client(
-        config.host,
-        config.port)
+    client = get_coap_client(config)
 
     try:
-
         print('Starting CoAP server.\nPress Ctrl + C to stop.')
 
         # Send test data if provided
         if file:
             send_test_data(file, client, config.path, verbose, config.sleep_interval)
-
         # Else read from sensor
         else:
-
             while True:
-
                 # Note that sometimes you won't get a reading and
                 # the results will be null (because Linux can't
                 # guarantee the timing of calls to read the sensor).
@@ -163,6 +162,7 @@ def main(edit, verbose, file):
                 if sensor_data.has_data():
                     # Format the data to JSON to be sent
                     send_data(sensor_data, client, config.path, verbose)
+                    # client.send_data(sensor_data)
                 
                 # Wait specified time and repeat
                 sleep(config.sleep_interval)
