@@ -40,8 +40,6 @@ except ImportError:
         read_retry = lambda sensor, gpio_pin: (20, 25),
         AM2302 = 1)
 
-
-
 def get_sensor_data(sensor, gpio_pin):
     """
     Returns a SensorData object containing the latest data 
@@ -92,6 +90,37 @@ def send_data(sensor_data, client, path, verbose):
     # Print data transmitted
     if verbose:
         click.echo(str(datetime.now()) + '\tData sent:\t' + str(sensor_data))
+
+def send_test_data(file, client, path, verbose, sleep_interval):
+
+    print('Sending data from file: {}'.format(file))
+
+    with open(file, 'r') as data_file:
+        # check for header
+        has_header = csv.Sniffer().has_header(data_file.read(1024))
+
+        # rewind
+        data_file.seek(0)
+
+        # skip headers
+        if has_header:
+            next(data_file)
+
+        # read data into ordered dictionary using fieldnames
+        # read all non quoted fields as floats
+        csv_reader = csv.DictReader(data_file, 
+                                    fieldnames=('humidity', 'temp'),
+                                    quoting=csv.QUOTE_NONNUMERIC)
+        
+        # send the test data to coap endpoint
+        for row in csv_reader:
+            send_data(SensorData(row['humidity'], row['temp']), 
+                      client, 
+                      path, 
+                      verbose)
+
+            # Wait specified time and repeat
+            sleep(sleep_interval)
 
 @click.command()
 @click.option('-e', '--edit', is_flag=True, help='open config file')
@@ -193,34 +222,3 @@ def get_config(edit):
     config = configparser.ConfigParser()
     config.read(config_ini)
     return config
-
-def send_test_data(file, client, path, verbose, sleep_interval):
-
-    print('Sending data from file: {}'.format(file))
-
-    with open(file, 'r') as data_file:
-        # check for header
-        has_header = csv.Sniffer().has_header(data_file.read(1024))
-
-        # rewind
-        data_file.seek(0)
-
-        # skip headers
-        if has_header:
-            next(data_file)
-
-        # read data into ordered dictionary using fieldnames
-        # read all non quoted fields as floats
-        csv_reader = csv.DictReader(data_file, 
-                                    fieldnames=('humidity', 'temp'),
-                                    quoting=csv.QUOTE_NONNUMERIC)
-        
-        # send the test data to coap endpoint
-        for row in csv_reader:
-            send_data(SensorData(row['humidity'], row['temp']), 
-                      client, 
-                      path, 
-                      verbose)
-
-            # Wait specified time and repeat
-            sleep(sleep_interval)
