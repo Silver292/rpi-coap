@@ -8,6 +8,8 @@
   - [Configuration](#configuration)
   - [Config.ini](#configini)
 - [Usage](#usage)
+  - [Command line options](#command-line-options)
+- [Stopping](#stopping)
   
 ## Introduction
 
@@ -57,6 +59,8 @@ $ rpicoap
 
 Settings are kept in the ``config.ini`` file. You can copy ``config.ini.example`` to create your own or this file will be created the first time you run the script.
 
+The easiest way to edit the configuration file is to run the program passing the edit flag ``-e`` or ``--edit`` i.e. ``rpicoap -e`` or ``rpicoap --edit``. This will open the configuration file with your default editor. 
+
 Most of the default settings should be fine, unless you are using a different GPIO port on the Raspberry Pi.
 
 You will need to update the ``host`` and ``device_auth_token`` settings in the ``config.ini``. 
@@ -87,4 +91,28 @@ To start recording and sending data to the Thingsboard platform run:
 $ rpi-coap
 ```
 
-To stop the script press ``Ctrl + Z``.
+This will start the CoAP client and begin reading data from the sensor and sending it to the ThingsBoard dashboard.
+
+### Command line options
+
+``--help`` - Running the application with this will display the help text.
+
+``-e --edit`` - This will open the configuration file with your default editor.
+
+``-f --file filename.csv`` - This allows a csv file to be passed to the program. The data contained in the csv sent to the ThingsBoard platform. This is useful for testing configurations. Data in the csv file must be in the format:
+
+```csv
+humidity,temperature
+10,24
+10.5,24.2
+...etc
+```
+
+Where the header row is optional.
+
+
+``-v --verbose`` - This option will display the data being sent with a timestamp.
+
+## Stopping
+
+To stop the script press ``Ctrl + C``.
