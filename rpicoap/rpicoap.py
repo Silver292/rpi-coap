@@ -7,7 +7,7 @@ CoAP endpoint
 __author__ = "Tom Scott"
 
 import click
-from json import dumps
+import json
 from socket import gethostbyname, gaierror
 from time import sleep
 from datetime import datetime
@@ -20,6 +20,7 @@ import subprocess
 import sys
 from coapthon.client.helperclient import HelperClient
 import logging
+import csv
 
 # Set default logging level for imported module
 logging.getLogger('coapthon').setLevel(logging.WARNING)
@@ -63,7 +64,7 @@ class SensorData(object):
         """
         Returns the humidity and temperature data as a JSON string.
         """
-        return dumps({'humidity': self.humidity, \
+        return json.dumps({'humidity': self.humidity, \
                 'temperature': self.temperature})
 
     def __str__(self):
@@ -123,9 +124,10 @@ def send_data(sensor_data, client, path, verbose):
         click.echo(str(datetime.now()) + '\tData sent:\t' + str(sensor_data))
 
 @click.command()
-@click.option('--edit', is_flag=True, help='open config file')
-@click.option('--verbose', is_flag=True, help='show data transmitted')
-def main(edit, verbose):
+@click.option('-e', '--edit', is_flag=True, help='open config file')
+@click.option('-v', '--verbose', is_flag=True, help='show data transmitted')
+@click.option('-f', '--file', type=str, help='csv file to use as data\nExpects humidity,temperature format.')
+def main(edit, verbose, file):
     """ Main entry point of the app """
 
     # Get configuration file
@@ -153,25 +155,36 @@ def main(edit, verbose):
     sleep_interval = sleep_interval if sleep_interval >= 1 else 1 
 
     try:
-        while True:
 
-            # Note that sometimes you won't get a reading and
-            # the results will be null (because Linux can't
-            # guarantee the timing of calls to read the sensor).
-            sensor_data = get_sensor_data(
-                sensor_lib.AM2302,
-                config.getint('custom', 'gpio_pin'))
+        print('Starting CoAP server.\nPress Ctrl + C to stop.')
 
-            if sensor_data.has_data():
-                # Format the data to JSON to be sent
-                send_data(sensor_data, client, path, verbose)
-            
-            # Wait specified time and repeat
-            sleep(sleep_interval)
+        # Send test data if provided
+        if file:
+            send_test_data(file, client, path, verbose, sleep_interval)
+
+        # Else read from sensor
+        else:
+
+            while True:
+
+                # Note that sometimes you won't get a reading and
+                # the results will be null (because Linux can't
+                # guarantee the timing of calls to read the sensor).
+                sensor_data = get_sensor_data(
+                    sensor_lib.AM2302,
+                    config.getint('custom', 'gpio_pin'))
+
+                if sensor_data.has_data():
+                    # Format the data to JSON to be sent
+                    send_data(sensor_data, client, path, verbose)
+                
+                # Wait specified time and repeat
+                sleep(sleep_interval)
 
     # Allow Ctrl + C to stop the script
     except KeyboardInterrupt:
         click.echo("Interrupted by keyboard, stopping client")
+    finally:
         client.stop()
         exit(0)
 
@@ -210,3 +223,34 @@ def get_config(edit):
     config = configparser.ConfigParser()
     config.read(config_ini)
     return config
+
+def send_test_data(file, client, path, verbose, sleep_interval):
+
+    print('Sending data from file: {}'.format(file))
+
+    with open(file, 'r') as data_file:
+        # check for header
+        has_header = csv.Sniffer().has_header(data_file.read(1024))
+
+        # rewind
+        data_file.seek(0)
+
+        # skip headers
+        if has_header:
+            next(data_file)
+
+        # read data into ordered dictionary using fieldnames
+        # read all non quoted fields as floats
+        csv_reader = csv.DictReader(data_file, 
+                                    fieldnames=('humidity', 'temp'),
+                                    quoting=csv.QUOTE_NONNUMERIC)
+        
+        # send the test data to coap endpoint
+        for row in csv_reader:
+            send_data(SensorData(row['humidity'], row['temp']), 
+                      client, 
+                      path, 
+                      verbose)
+
+            # Wait specified time and repeat
+            sleep(sleep_interval)
