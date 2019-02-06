@@ -131,7 +131,7 @@ def main(edit):
 
     # Raise an error if the auth token is not defined in config file
     if not auth_token:
-        raise ValueError('Device auth token not present, please update config.ini')
+        raise ValueError('Device auth token not present, please update config.ini by running rpicoap --edit')
 
     path = "api/v1/" + auth_token + "/telemetry"
 
