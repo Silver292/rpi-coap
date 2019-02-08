@@ -170,6 +170,8 @@ def main(edit, verbose, file):
     # Allow Ctrl + C to stop the script
     except KeyboardInterrupt:
         click.echo("Interrupted by keyboard, stopping client")
+    except ValueError as config_error:
+        click.echo(config_error)
     finally:
         client.stop()
         exit(0)
