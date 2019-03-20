@@ -9,7 +9,7 @@ import configparser
 
 class Config(object):
     """
-    Class to hold config data fro rpicoap package.
+    Class to hold config data from rpicoap package.
     """
     def __init__(self):
         # Read the config file
